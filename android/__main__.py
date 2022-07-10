@@ -248,8 +248,9 @@ async def main ():
 
                     mesj = await bot.get_messages(m.chat_id, ids=m.id)
                     bilgi("Kopyalanacak mesaj hazır!")
+                    maing=(await bot.get_entity(mainpath)).id
                     try:
-                        await bot.send_message(mainpath,mesj);onemli("✅ İşlem tamamlandı! Hedef post iletildi!")
+                        await bot.send_message(maing,mesj);onemli("✅ İşlem tamamlandı! Hedef post iletildi!")
                     except Exception as e:
                         noadded(f"{m.chat_id} kaynağından ana group hedefine iletilememe hatası: {str(e)}")
 
