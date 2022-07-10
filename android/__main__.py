@@ -222,6 +222,43 @@ async def main ():
             n()
             log("💨💨 Şimdi botunuz çalışıyor ve yan kanallarda birşey paylaşılmasını bekliyor...","green")
             statusz="Bottan çıkış yapıldı!"
+            @clabtetikleyici(bot=bot,incoming=True, pattern="^.start",disable_edited=True)
+            async def strt(m):
+                await m.reply("Running...⚡")
+
+            @clabtetikleyici(bot=bot,incoming=True, pattern="^.maingroup(?: |$)(.*)",disable_edited=True)
+            async def mngrp(m):
+                #string = m.pattern_match.group(1)
+                await m.reply("🆔: {}".format(mainpath))
+
+            @clabtetikleyici(bot=bot,incoming=True, pattern="^.channels(?: |$)(.*)",disable_edited=True)
+            async def chnlsc(m):
+                await m.respond("📋: {}".format(str(channelpath)))
+                text=""
+                for i in channelpath:
+                    text+="🆔: {}\n".format(i)
+                await m.respond("{}".format(text))
+
+
+            @clabtetikleyici(bot=bot,incoming=True,groups_only=True,disable_edited=True)
+            async def postmain(m):
+                if str(m.chat_id) in channelpath:
+   
+                    onemli("🔄 Yeni bir post tespit edildi,gönderiliyor...")
+
+                    mesj = await bot.get_messages(m.chat_id, ids=m.id)
+                    bilgi("Kopyalanacak mesaj hazır!")
+                    try:
+                        await bot.send_message(mainpath,mesj);onemli("✅ İşlem tamamlandı! Hedef post iletildi!")
+                    except Exception as e:
+                        noadded(f"{m.chat_id} kaynağından ana group hedefine iletilememe hatası: {str(e)}")
+
+                    #else:
+                    #await m.reply("✉️: {}".format(str(m)))
+     
+        
+                else:
+                    bilgi(f"Şuradan bir mesaj algılandım🌀: {m.chat_id}")
             with console.status("[bold thistle1]⌛ Bot çalışıyor, durdurmak için Ctrl C yapın!") as status:
                 try:
                     await bot.run_until_disconnected()
@@ -247,43 +284,7 @@ async def main ():
     log("Çıkış isteğiniz gerçekleşiyor...","yellow1")
     await disconn()
 
-@clabtetikleyici(bot=bot,incoming=True, pattern="^.start",disable_edited=True)
-async def muutf(m):
-    await m.reply("Running...⚡")
 
-@clabtetikleyici(bot=bot,incoming=True, pattern="^.maingroup(?: |$)(.*)",disable_edited=True)
-async def muutf(m):
-    #string = m.pattern_match.group(1)
-    await m.reply("🆔: {}".format(mainpath))
-
-@clabtetikleyici(bot=bot,incoming=True, pattern="^.channels(?: |$)(.*)",disable_edited=True)
-async def muutf(m):
-    await m.respond("📋: {}".format(str(channelpath)))
-    text=""
-    for i in channelpath:
-        text+="🆔: {}\n".format(i)
-    await m.respond("{}".format(text))
-
-
-@clabtetikleyici(bot=bot,incoming=True,groups_only=True,disable_edited=True)
-async def muutf(m):
-    if str(m.chat_id) in channelpath:
-   
-        onemli("🔄 Yeni bir post tespit edildi,gönderiliyor...")
-
-        mesj = await bot.get_messages(m.chat_id, ids=m.id)
-        bilgi("Kopyalanacak mesaj hazır!")
-        try:
-            await bot.send_message(mainpath,mesj);onemli("✅ İşlem tamamlandı! Hedef post iletildi!")
-        except Exception as e:
-            noadded(f"{m.chat_id} kaynağından ana group hedefine iletilememe hatası: {str(e)}")
-
-        #else:
-        #await m.reply("✉️: {}".format(str(m)))
-     
-        
-    else:
-        bilgi(f"Şuradan bir mesaj algılandım🌀: {m.chat_id}")
 eklenecek=False
 
 @clabtetikleyici(bot=bot,incoming=True,groups_only=False,disable_edited=True,trigger_on_fwd=True)
