@@ -30,29 +30,39 @@ except Exception:
     hata(f"Bir sorunla karşılaştık! Bu hatayı geliştiriciye bildirin:\n{format_exc()}")
 async def botagir():
     global bot
-    data = [1,2,3,4]
-    n()
-    with console.status("[bold blue] Bota girme işlemi sürüyor...") as status:
-        while data:
-            num = data.pop(0)
-            sleep(.5)
-            if num==1:
-                log("🔑 Token ayarlanıyor...","cyan")
-                token = base64.b64decode(Token)
-            elif num==2:
-                console.log("[cyan] 🎟️ Giriş yapılıyor...[/cyan]")
-                console.log("[red] 🎟️ Hata alınması en muhtemel yer...[/red]")
-                await bot.start(bot_token=token)
-                bot.parse_mode="html"
-            elif num==3:
-                try:
-                    await bot.send_message(0000000,"⌛ Bot başladı!")
-                except:
-                    noadded('Mesaj gönderilememe hatası!')
-            elif num==4:
-                console.log(f'[bold][green]✅ Bot girişi yapıldı!')
-                #await bot.disconnect()
+    bilgi("Şimdi hesabını tanımam lazım.")
+    api_hash=0
+    stringsession=None
+    api_id = soru("Hesabınızın API ID'i veya CLab-AccountToken:")
+    if api_id.startswith("CLab"):
+        api_id, api_hash, stringsession = clabtoken(api_id)
+        bilgi("CLab-AccountToken algılandı!")
+    else:
+        try:
+            int(api_id)
+        except Exception:
+            hata("🛑 API ID Hatalı ! 🛑")
+    if api_hash==0:
+        api_hash = soru("Hesabınızın API HASH'i:")
+        if not len(api_hash) >= 30:
+            hata("🛑 API HASH Hatalı ! 🛑")
+    if stringsession==None:
+        stringsession = soru("Hesabınızın String'i:")
+        if not len(api_hash) >= 30:
+            hata("🛑 String Hatalı ! 🛑")
+
+    try:
+        bot = TelegramClient(
+        StringSession(stringsession),
+        api_id=api_id,
+        api_hash=api_hash,
+        lang_code="tr")
+        basarili(api_hash + " için client oluşturuldu !")
+    except Exception as e:
+        hata(api_hash + f" için client oluşturulamadı ! 🛑 Hata: {str(e)}")
+
     return bot
+
 async def setdirectory(pprint=True):
     sep = os.sep
     li = os.getcwd().split(sep)
@@ -60,26 +70,22 @@ async def setdirectory(pprint=True):
     passed("Dizin ayarlanıyor")
     if os.name=="nt":
         os.chdir("c://")
-        li = os.getcwd().split(sep)
     elif "home" in li: #termux
         while True:
             if not li[-1] == "home": #termux
                 os.chdir(os.pardir)
             else:
                 break
-            li = os.getcwd().split(sep)
     else:
         hata("403 Forbidden | Geçersiz işletim sistemi!")
     li = os.getcwd().split(sep)
     if pprint:rprint(li)
     oathh="{}{}m-r".format(os.getcwd(),sep)
-    try:
-        os.makedirs(oathh)
-    except FileExistsError:
-        pass
+    try: os.makedirs(oathh)
+    except FileExistsError: pass
     return oathh
 
-async def getdirectory(oathh,file):
+def getdirectory(oathh,file):
     oathh="{main}{sep}{file}".format(main=oathh,sep=os.sep,file=file)
     rprint(oathh)
     return oathh
@@ -89,7 +95,7 @@ async def setchannel(isp=0,pprint=True,forceadd=""):
 
     if isp == 0:
                 error=False
-                with open(await getdirectory(oathh,"main.txt"),"w") as f:
+                with open(getdirectory(oathh,"main.txt"),"w") as f:
                     if forceadd == "":
                         neolsun=soru("🍀 Ana kanal ne olsun? Lütfen id'i yazın!")
                         onayl = onay(f"Ana kanal '{neolsun}' olsun mu ?")
@@ -106,24 +112,24 @@ async def setchannel(isp=0,pprint=True,forceadd=""):
                             log("Hatalı kanal id'si!","red");error=True
                     else: f.write(adds+forceadd);basarili("✅ Force ({}) başarıyla tamamlandı!".format(forceadd))
                 if error:
-                    if os.path.isfile(await getdirectory(oathh,"main.txt")): os.remove(await getdirectory(oathh,"main.txt"))
+                    if os.path.isfile(getdirectory(oathh,"main.txt")): os.remove(getdirectory(oathh,"main.txt"))
                     return await setchannel (isp, False, forceadd)
                 eklenecek=False
-                return await getdirectory(oathh,"main.txt")
+                return getdirectory(oathh,"main.txt")
     elif isp == 1:
                 error=False
-                if os.path.isfile(await getdirectory(oathh,"channel.txt")):adds="\n"
+                if os.path.isfile(getdirectory(oathh,"channel.txt")):adds="\n"
                 else:adds=""
                 try:
-                    with open(await getdirectory(oathh,"channel.txt"),"r") as f:
+                    with open(getdirectory(oathh,"channel.txt"),"r") as f:
                         channelsss=f.read().split('\n')
                 except FileNotFoundError: channelsss=[]
-                with open(await getdirectory(oathh,"channel.txt"),"a") as f:
+                with open(getdirectory(oathh,"channel.txt"),"a") as f:
                     if forceadd == "":
                         neolsun=soru("🍀 Eklenecek yan kanal ne olsun? Lütfen id'i yazın!")
                         onayl = onay(f"Yan kanallara '{neolsun}' eklensin mi ?")
                         try:
-                            neolsunn = int(neolsun)
+                            int(neolsun)
                         except ValueError:
                             noadded("Lütfen bir kanal id yazın!");error=True
                         if neolsun in channelsss:noadded("Bu kadar zaten daha önceden eklenmiş!")
@@ -135,16 +141,16 @@ async def setchannel(isp=0,pprint=True,forceadd=""):
                             log("Hatalı kanal id'si!","red");error=True
                     else: f.write(adds+forceadd);basarili("✅ Force ({}) başarıyla tamamlandı!".format(forceadd))
                 if error:
-                    if os.path.isfile(await getdirectory(oathh,"channel.txt")): os.remove(await getdirectory(oathh,"channel.txt"))
+                    if os.path.isfile(getdirectory(oathh,"channel.txt")): os.remove(getdirectory(oathh,"channel.txt"))
                     return await setchannel (isp, False, forceadd)
                 eklenecek=False
-                return await getdirectory(oathh,"channel.txt")
+                return getdirectory(oathh,"channel.txt")
 
 async def getchannel (isp=0,pprint=True):
     oathh=await setdirectory(pprint)
     if isp == 0:
-                if os.path.isfile(await getdirectory(oathh,"main.txt")):
-                    with open(await getdirectory(oathh,"main.txt"),"r") as f:
+                if os.path.isfile(getdirectory(oathh,"main.txt")):
+                    with open(getdirectory(oathh,"main.txt"),"r") as f:
                         file = f.read()
                     if not file.split('\n')[0].startswith("-100"):
                         await setchannel (isp,False); return await getchannel (isp,False)
@@ -152,8 +158,8 @@ async def getchannel (isp=0,pprint=True):
                 else:
                     await setchannel (isp,False); return await getchannel (isp,False)
     elif isp == 1:
-                if os.path.isfile(await getdirectory(oathh,"channel.txt")):
-                    with open(await getdirectory(oathh,"channel.txt"),"r") as f:
+                if os.path.isfile(getdirectory(oathh,"channel.txt")):
+                    with open(getdirectory(oathh,"channel.txt"),"r") as f:
                         file = f.read()
                     if not file.split('\n')[0].startswith("-100"):
                         await setchannel (isp,False); return await getchannel (isp,False)
@@ -213,7 +219,7 @@ async def main ():
             channelpath= await getchannel (1)
             bot = await botagir()
             n()
-            log("💨💨 Şimdi botunuz çalışıyor ve ana kanalınızda birşey paylaşmanız bekleniyor...","green")
+            log("💨💨 Şimdi botunuz çalışıyor ve yan kanallarda birşey paylaşılmasını bekliyor...","green")
             statusz="Bottan çıkış yapıldı!"
             with console.status("[bold thistle1]⌛ Bot çalışıyor, durdurmak için Ctrl C yapın!") as status:
                 try:
@@ -237,6 +243,8 @@ async def main ():
             break
         if islem not in ["1","2","3","4"]:
             statusz= "Hatalı işlem seçimi!"; continue 
+    log("Çıkış isteğiniz gerçekleşiyor...","yellow1")
+    await disconn()
 
 @clabtetikleyici(bot=bot,incoming=True, pattern="^.start",disable_edited=True)
 async def muutf(m):
@@ -291,7 +299,7 @@ async def handler(event):
 async def disconn():
     try:
         await bot.disconnect()
-        log("Bottan çıkış yapıldı!","red")
+        hata("Bottan çıkış yapıldı!","red")
     except:
         pass
 
