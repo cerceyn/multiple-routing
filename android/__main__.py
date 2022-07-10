@@ -89,7 +89,7 @@ def getdirectory(oathh,file):
     oathh="{main}{sep}{file}".format(main=oathh,sep=os.sep,file=file)
     rprint(oathh)
     return oathh
-async def setchannel(isp=0,pprint=True,forceadd=""):
+async def setchannel(isp=0,pprint=False,forceadd=""):
     global eklenecek; eklenecek=True
     oathh=await setdirectory(pprint)
 
@@ -146,7 +146,7 @@ async def setchannel(isp=0,pprint=True,forceadd=""):
                 eklenecek=False
                 return getdirectory(oathh,"channel.txt")
 
-async def getchannel (isp=0,pprint=True):
+async def getchannel (isp=0,pprint=False):
     oathh=await setdirectory(pprint)
     if isp == 0:
                 if os.path.isfile(getdirectory(oathh,"main.txt")):
@@ -168,35 +168,6 @@ async def getchannel (isp=0,pprint=True):
                     await setchannel (isp,False); return await getchannel (isp,False)
     return None
 
-async def forchannel(bot,channelpath,message):
-    bilgi ("Perceived: ")
-    onemli(channelpath)
-    basarilic=0
-    mesj = await bot.get_messages(message.chat_id, ids=message.id)
-    bilgi("Kopyalanacak mesaj hazır!")
-    for chnl in channelpath:
-        if chnl == "":continue 
-        if chnl.startswith("-100"):
-            bilgi("Şuraya mesaj gönderilmeye çalışılıyor..: {}".format(chnl))
-            try:
-                chat=await bot.get_entity(int(chnl))
-                await bot.send_message(chat.id,mesj)
-                log("Mesaj {} kanalına gönderildi!".format(chat.id),"green")
-                basarilic+=1
-            except PeerIdInvalidError:
-                noadded("Kanal ID'si({}) hatalı, lütfen bunu silin!".format (chnl))
-            except Exception as e:
-                noadded("✖️ Yan kanallardan '{}' mesaj atılmadı! Hata: {}".format(chnl,str(e)))
-        else:
-            try:
-                chat=await bot.get_entity(int(chnl)) #types.PeerChannel(int(chnl))
-                await bot.send_message(chat,mesj)
-                log("Mesaj {} kanalına gönderildi!".format(chat.id),"green")
-                basarilic+=1
-            except Exception as e:
-                noadded("✖️ Yan kanallardan '{}' mesaj atılmadı! Hata: {}".format(chnl,str(e)))
-    return basarilic
-
 mainpath= ""
 channelpath=""
 async def main ():
@@ -207,8 +178,9 @@ async def main ():
         logo(True)
         if statusz=="ads":ads("Free trial bitiş süresi: 31 gün",.5); statusz=None
         elif statusz:
-            passed(statusz);statusz=None
-        passed("İşlemler:\n\n🍀 1:Botu başlat!\n🍀 2:Ana Kanal Ayarla veya Değiştir!\n🍀 3:Yan Kanal Ekle!\n🍀 4:Çıkış")
+            onemli(statusz);statusz=None
+        
+        passed("İşlemler:\n\n** 1:Botu başlat!\n🍀 2:Ana Kanal Ayarla veya Değiştir!\n🍀 3:Yan Kanal Ekle!\n🍀 4:Çıkış")
         try:
             islem = soru_("Yapacağınız işlemi seçin [1-4]?")
         except:
@@ -225,7 +197,9 @@ async def main ():
             @clabtetikleyici(bot=bot,incoming=True, pattern="^.start",disable_edited=True)
             async def strt(m):
                 await m.reply("Running...⚡")
-
+            @clabtetikleyici(bot=bot,outgoing=True, pattern="^.start",disable_edited=True)
+            async def strt(m):
+                await m.edit("Running...⚡")
             @clabtetikleyici(bot=bot,incoming=True, pattern="^.maingroup(?: |$)(.*)",disable_edited=True)
             async def mngrp(m):
                 #string = m.pattern_match.group(1)
@@ -247,10 +221,10 @@ async def main ():
                     onemli("🔄 Yeni bir post tespit edildi,gönderiliyor...")
 
                     mesj = await bot.get_messages(m.chat_id, ids=m.id)
-                    bilgi("Kopyalanacak mesaj hazır!")
+                    bilgi(">> Kopyalanacak mesaj hazır!")
                     maing=(await bot.get_entity(int(mainpath))).id
                     try:
-                        await bot.send_message(maing,mesj);onemli("✅ İşlem tamamlandı! Hedef post iletildi!")
+                        await bot.send_message(maing,mesj);basarili("✅ İşlem tamamlandı! Hedef post iletildi!")
                     except Exception as e:
                         noadded(f"{m.chat_id} kaynağından ana group hedefine iletilememe hatası: {str(e)}")
 
@@ -288,11 +262,11 @@ async def main ():
 
 eklenecek=False
 
-@clabtetikleyici(bot=bot,incoming=True,groups_only=False,disable_edited=True,trigger_on_fwd=True)
+"""@clabtetikleyici(bot=bot,incoming=True,groups_only=False,disable_edited=True,trigger_on_fwd=True)
 async def muutf(m):
     if m.fwd_from and m.views:
         await m.reply("🆔: <i>Kanal ID:</i> {}".format(m.fwd_from.from_id))
-
+"""
 
 """
 @bot.on(bberc(incoming=True))
