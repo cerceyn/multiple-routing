@@ -218,6 +218,7 @@ async def main ():
             mainpath= await getchannel (0)
             channelpath= await getchannel (1)
             bot = await botagir()
+            await conn(bot)
             n()
             log("💨💨 Şimdi botunuz çalışıyor ve yan kanallarda birşey paylaşılmasını bekliyor...","green")
             statusz="Bottan çıkış yapıldı!"
@@ -296,6 +297,15 @@ async def muutf(m):
 async def handler(event):
     await event.reply("b "+ event.text)
 """
+async def conn(userbot):
+    try: await userbot.connect();onemli("Hesaba bağlandı...")
+    except Exception as e:
+        try: await userbot.disconnect();await userbot.connect()
+        except:
+            if "deleted/deactivated" in str(e):
+                hata("Telegram adminleri hesabınızı yasaklamış olduğundan işlem yapılamıyor")
+            hata("Bu hesaba giremiyorum! Hata: "+ str(e))
+    return userbot 
 async def disconn():
     try:
         await bot.disconnect()
