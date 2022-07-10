@@ -63,11 +63,11 @@ async def botagir():
 
     return bot
 
-async def setdirectory(pprint=True):
+async def setdirectory(pprint=False):
     sep = os.sep
     li = os.getcwd().split(sep)
     if pprint:bilgi(li[-1])
-    passed("Dizin ayarlanıyor")
+    passed("[SD] Dizin ayarlanıyor")
     if os.name=="nt":
         os.chdir("c://")
     elif "home" in li: #termux
