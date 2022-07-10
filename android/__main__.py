@@ -248,7 +248,7 @@ async def main ():
 
                     mesj = await bot.get_messages(m.chat_id, ids=m.id)
                     bilgi("Kopyalanacak mesaj hazır!")
-                    maing=(await bot.get_entity(mainpath)).id
+                    maing=(await bot.get_entity(int(mainpath))).id
                     try:
                         await bot.send_message(maing,mesj);onemli("✅ İşlem tamamlandı! Hedef post iletildi!")
                     except Exception as e:
