@@ -1,4 +1,3 @@
-from traceback import format_exc
 from telethon.tl.functions.channels import InviteToChannelRequest
 from telethon.tl.functions.messages import AddChatUserRequest
 from .events import register as clabtetikleyici 
@@ -8,6 +7,7 @@ from telethon.sessions import StringSession
 from telethon import TelegramClient
 from subprocess import PIPE, Popen
 from rich import print as rprint
+from traceback import format_exc
 from telethon import types
 from time import sleep
 from android import *
@@ -76,6 +76,7 @@ async def setdirectory(pprint=False):
                 os.chdir(os.pardir)
             else:
                 break
+            li = os.getcwd().split(sep)
     else:
         hata("403 Forbidden | Geçersiz işletim sistemi!")
     li = os.getcwd().split(sep)
