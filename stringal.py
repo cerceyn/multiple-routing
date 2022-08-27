@@ -1,4 +1,155 @@
-from android import basarili, noadded, pip_, bilgi, soru, logo, clabtoken 
+from subprocess import PIPE, Popen
+from Crypto.Cipher import AES
+from base64 import b64encode, b64decode
+from time import sleep as antripp
+def pip_(module):
+    onemli(f"installing {module} for cerceynlab")
+    pip_cmd = ["pip", "install", f"{module}"]
+    process = Popen(pip_cmd, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = process.communicate()
+    return stdout
+
+try: 
+    from rich.console import Console
+    from rich.panel import Panel
+except:
+    pip_("rich")
+finally:
+    from rich.console import Console
+    from rich.panel import Panel
+console = Console()
+def nn():
+    console.print("\n\n")
+def hata (text):
+    nn()
+    console.log(f'[bold red]❌ {text}[/]') 
+    sys.exit()
+def onemli (text):
+    nn()
+    console.print(f'[bold cyan]❗ {text}[/]')      
+
+def pip_(module):
+    onemli(f"📥 installing {module} for cerceynlab")
+    pip_cmd = ["pip", "install", f"{module}"]
+    process = Popen(pip_cmd, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = process.communicate()
+    return stdout
+               
+def bilgi (text):
+    nn()
+    console.log(f'[blue]ℹ️ {text}[/]')
+def clabtoken(text,coz=True):
+    data = [1, 2, 3, 4, 5]
+    ktext=None
+    key=None
+    nn()
+    with console.status("[bold blue] Clabtoken İşlemi Sürüyor...") as status:
+        while data:
+            num = data.pop(0)
+            antripp(2)
+            if num==1:
+                console.log(f"[green] Şifrelenmiş keyler ayrıştırılıyor...[/green]")
+                try:
+                    ktext=text.split('&&')[1]
+                    key=text.split('&&')[2]
+                except IndexError:
+                    hata("Bu bir CLab-AccountToken değil!")
+            elif num==2:
+                test_crpt = CLabToken()
+                console.log(f"[green]Token nesnesi oluşturuldu![/green]")
+            elif num==3 and coz==False:
+                test_enctext = test_crpt.yap(ktext, key)
+                console.log(f"[green]Token Şifreleniyor.[/green]")
+                antripp(2)
+                test_enc_text = f"CLab&&{test_enctext}&&{key}"
+                console.log(f"[green]Token Formatı Ayarlandı![/green]")
+            elif num==4 and coz:
+                console.log(f"[green]Token çözülüyor..[/green]")
+                test_dec_text = test_crpt.coz(ktext, key)
+                console.log(f"[green]Bilgiler ayrıştırılıyor...[/green]")
+                antripp(2)
+                api_id = test_dec_text.split("|")[0]
+                api_hash = test_dec_text.split("|")[1]
+                string = test_dec_text.split("|")[2]
+            elif num==5:
+                if not coz:
+                    console.log(f"[green]Token oluşturma işlemi başarılı![/green]")
+                    return test_enc_text
+                else:
+                    console.log(f"[green]Token çözme işlemi başarılı![/green]")
+                    return api_id, api_hash, string 
+
+    try:
+        ss = text.split('|')
+        if len(ss[1]) <29:
+            hata("Bu bir CLab-AccountToken değil!")
+        return ss[2], ss[1], ss[3]
+    except IndexError:
+        hata("Bu bir CLab-AccountToken değil!")
+    return None, None, None
+def noadded (text):
+    nn()
+    console.log(f'[red]❎ {text}[/]')  
+def basarili (text):
+    nn()
+    console.log(f'[bold green]✅ {text}[/]')   
+def soru (soru):
+    nn()
+    console.print(f'[bold thistle1]❔ {soru}[/]')
+    try:                 
+        return console.input(f"[bold yellow1]>> [/]")
+    except KeyboardInterrupt:
+        hata("Klavye çıkışı yapıldı!")
+def onay (text):
+    while True:
+        cevap=soru(text)
+        if cevap in ["Evet","evet","Yes","yes","Y","y"]:
+            return True
+        elif cevap in ["Hayır","Hayır","hayır","hayir","No","no"]:
+            return False
+        else:
+            noadded("Lütfen sadece evet-yes veya hayır-no diyin!")
+def logo (satirbırak=False):
+    text = "█▀▀ █▀▀ █▀█ █▀▀ █▀▀ █▄█ █▄░█\n█▄▄ ██▄ █▀▄ █▄▄ ██▄ ░█░ █░▀█\n\n█░░ ▄▀█ █▄▄\n█▄▄ █▀█ █▄█"
+    if satirbırak:
+        for i in range(25):
+            console.print("\n")
+    console.print(Panel(f'[bold medium_purple]{text}[/]',width=90),justify="center")
+class CLabToken:
+
+    def __init__(self, salt='SlTKeYOpHygTYkP3'):
+        self.salt = salt.encode('utf8')
+        self.enc_dec_method = 'utf-8'
+
+    def yap(self, str_to_enc, str_key):
+        try:
+            aes_obj = AES.new(str_key.encode('utf-8'), AES.MODE_CFB, self.salt)
+            hx_enc = aes_obj.encrypt(str_to_enc.encode('utf8'))
+            mret = b64encode(hx_enc).decode(self.enc_dec_method)
+            return mret
+        except ValueError as value_error:
+            if value_error.args[0] == 'IV must be 16 bytes long':
+                raise ValueError('Encryption Error: SALT must be 16 characters long')
+            elif value_error.args[0] == 'AES key must be either 16, 24, or 32 bytes long':
+                raise ValueError('Encryption Error: Encryption key must be either 16, 24, or 32 characters long')
+            else:
+                raise ValueError(value_error)
+
+    def coz(self, enc_str, str_key):
+        try:
+            aes_obj = AES.new(str_key.encode('utf8'), AES.MODE_CFB, self.salt)
+            str_tmp = b64decode(enc_str.encode(self.enc_dec_method))
+            str_dec = aes_obj.decrypt(str_tmp)
+            mret = str_dec.decode(self.enc_dec_method)
+            return mret
+        except ValueError as value_error:
+            if value_error.args[0] == 'IV must be 16 bytes long':
+                raise ValueError('Decryption Error: SALT must be 16 characters long')
+            elif value_error.args[0] == 'AES key must be either 16, 24, or 32 bytes long':
+                raise ValueError('Decryption Error: Encryption key must be either 16, 24, or 32 characters long')
+            else:
+                raise ValueError(value_error)
+
 import asyncio
 import sys
 import time
@@ -158,7 +309,8 @@ if __name__ == '__main__':
 
          if stringonay == 1:
             client = InteractiveTelegramClient(StringSession(), app_id, api_hash, numara)
-            bilgi("[i] String Keyiniz Aşağıdadır!\n\n\n" + client.session.save())
+            stringsession = client.session.save()
+            bilgi("[i] String Keyiniz Aşağıdadır!\n\n\n" + stringsession)
             text = "{}|{}|{}".format(app_id, api_hash, stringsession)
             Token = clabtoken(f"CLab&&{text}&&{test_key}",False)
             bilgi("[i] CLab-AccountToken Aşağıdadır:")
